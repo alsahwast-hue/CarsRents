@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>نظام تأجير السيارات</title>
+<style>
+*{box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif;margin:0;padding:0}
+body{background:#f0f4f8;color:#1a202c;min-height:100vh}
+#loginScreen{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#1e3a8a,#3b82f6)}
+.login-card{background:#fff;padding:40px;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:400px;text-align:center}
+.company-logo{width:80px;height:80px;margin:0 auto 15px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px}
+.company-name{font-size:22px;font-weight:bold;color:#1e3a8a;margin-bottom:5px}
+.company-sub{font-size:13px;color:#64748b;margin-bottom:25px}
+.field{margin-bottom:15px;text-align:right}
+.field label,.form-field label{display:block;margin-bottom:5px;font-size:14px;color:#334155;font-weight:600}
+.field input,.form-field input,.form-field select{width:100%;padding:10px 13px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;transition:.2s;background:#fff}
+.field input:focus,.form-field input:focus,.form-field select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.form-field{margin-bottom:5px}
+.form-field input[readonly]{background:#f8fafc}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+.error-msg{color:#dc2626;font-size:13px;margin-top:10px;min-height:18px}
+.hint{font-size:16px;color:#94a3b8;margin-top:15px}
+#appScreen{display:none}
+.topbar{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:14px 25px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.topbar-left,.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-logo{width:42px;height:42px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.topbar-title{font-size:18px;font-weight:bold}
+.user-info{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);padding:8px 15px;border-radius:25px;font-size:14px}
+.admin-badge{background:#f59e0b;padding:3px 10px;border-radius:15px;font-size:11px;font-weight:bold}
+.logout-btn{background:#dc2626;color:#fff;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.admin-menu{display:flex;gap:5px;padding:13px 23px;background:#ffffff;border-bottom:2px solid #9cc4f8;overflow-x:auto}
+.menu-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:12px;cursor:pointer;transition:.2s;min-width:100px;background:#c6f6f8;user-select:none}
+.menu-item:hover{background:#bcd5f5}
+.menu-item.active{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff}
+.menu-icon{font-size:26px}.menu-label{font-size:13px;font-weight:bold}
+.content{padding:0px;max-width:1200px;margin:0 auto}
+.main-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer}
+.card{background:#fff;border-radius:16px;padding:5px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:5px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card-title{font-size:18px;font-weight:bold;color:#1e3a8a;margin-bottom:5px;padding-bottom:12px;border-bottom:2px solid #e2e8f0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){
+  .table-wrap.keep-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.data-table.keep-table{display:table;width:100%;min-width:1000px}
+  table.data-table.keep-table thead{display:table-header-group}
+  table.data-table.keep-table tbody{display:table-row-group}
+  table.data-table.keep-table tfoot{display:table-footer-group}
+  table.data-table.keep-table tr{display:table-row;border:none;border-radius:0;margin:0;padding:0;background:transparent}
+  table.data-table.keep-table td{display:table-cell;width:auto;padding:12px 13px;border-bottom:1px solid #e2e8f0;text-align:right;white-space:nowrap!important}
+  table.data-table.keep-table td::before{content:none}
+}
+.car-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:15px}
+.car-item{border:2px solid #e2e8f0;border-radius:12px;padding:12px;cursor:pointer;transition:.2s;text-align:center;background:#f8fafc}
+.car-item:hover{border-color:#3b82f6}
+.car-item.selected{border-color:#10b981;background:#ecfdf5;box-shadow:0 0 0 3px rgba(16,185,129,.2)}
+.car-item img{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+.c-name{font-weight:bold;color:#1e3a8a;font-size:15px;margin-bottom:4px}
+.c-info{font-size:12px;color:#64748b;margin-bottom:2px}
+.c-price{font-size:14px;color:#059669;font-weight:bold;margin-top:6px}
+.actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.btn-save,.btn-print{flex:1;min-width:140px;padding:14px;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
+.btn-save{background:linear-gradient(135deg,#1e3a8a,#2563eb)}
+.btn-print{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.table-wrap{overflow-x:auto;border-radius:12px}
+table.data-table{width:100%;border-collapse:collapse;background:#fff}
+table.data-table th{background:linear-gradient(135deg,#2d5fe9,#2563eb);color:#fff;padding:13px;text-align:right;font-size:14px;white-space:nowrap}
+table.data-table td{padding:12px 13px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#334155}
+table.data-table tr:hover td{background:#f8fafc}
+.status-badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;white-space:nowrap}
+.status-pending{background:#fef3c7;color:#92400e}
+.status-approved,.status-paid{background:#d1fae5;color:#065f46}
+.status-rejected,.status-unpaid{background:#fee2e2;color:#991b1b}
+.status-recv{background:#dbeafe;color:#1e40af}
+.btn-sm{padding:6px 12px;border:none;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;margin:2px;color:#fff}
+.btn-view{background:#3b82f6}.btn-edit{background:#f59e0b}.btn-approve,.btn-paid{background:#10b981}.btn-reject{background:#dc2626}.btn-delete{background:#6b7280}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:5px;margin-bottom:5px;margin-top:5px}
+.stat-card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 4px 15px rgba(0,0,0,.06);border-right:5px solid #3b82f6}
+.stat-card.green{border-right-color:#10b981}.stat-card.red{border-right-color:#dc2626}.stat-card.orange{border-right-color:#f59e0b}
+.stat-label{font-size:13px;color:#64748b;margin-bottom:8px}
+.stat-value{font-size:24px;font-weight:bold;color:#1e3a8a}
+.stat-value.green{color:#059669}.stat-value.red{color:#dc2626}.stat-value.orange{color:#d97706}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;justify-content:center;align-items:flex-start;padding:30px 15px;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:25px;width:100%;max-width:700px;animation:slideIn .3s ease}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #e2e8f0}
+.modal-header h3{color:#1e3a8a;font-size:18px}
+.modal-close{background:#f1f5f9;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;color:#64748b}
+.modal-close:hover{background:#dc2626;color:#fff}
+.empty-state{text-align:center;padding:40px 20px;color:#94a3b8}
+.empty-state .icon{font-size:60px;margin-bottom:15px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:15px}
+.section-header h2{color:#1e3a8a;font-size:22px}
+.badge-count{background:#3b82f6;color:#fff;padding:4px 12px;border-radius:15px;font-size:13px;margin-right:10px}
+.print-area{display:none}
+@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{display:block;position:absolute;top:0;right:0;left:0;padding:30px;background:#fff}}
+
+/* ============ تجاوب الشاشات ============ */
+html{-webkit-text-size-adjust:100%}
+img{max-width:100%}
+.topbar-right{flex-wrap:wrap}
+@media(min-width:1400px){.content{max-width:1400px}.car-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
+@media(max-width:900px){
+  .content{padding:18px}.topbar{padding:12px 16px}.admin-menu{padding:12px 16px}
+  .menu-item{min-width:90px;padding:8px 12px}.modal{max-width:100%}
+}
+@media(max-width:600px){
+  .content{padding:12px}
+  .card{padding:16px;border-radius:12px}
+  .login-card{padding:28px 20px;margin:15px}
+  .topbar{flex-direction:column;align-items:stretch;text-align:center;padding:10px 12px}
+  .topbar-left,.topbar-right{justify-content:center}
+  .topbar-title{font-size:15px}
+  .user-info{font-size:13px;padding:6px 12px}
+  .admin-menu{gap:6px;padding:8px 10px}
+  .menu-item{min-width:78px;padding:6px 8px}.menu-icon{font-size:22px}.menu-label{font-size:12px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:5px}
+  .stat-card{padding:14px}.stat-value{font-size:18px}
+  .car-list{grid-template-columns:1fr 1fr;gap:10px}
+  .car-item{padding:8px}.car-item img{height:90px}
+  .main-btn{width:100%;justify-content:center}
+  .actions .btn-save,.actions .btn-print{min-width:100%}
+  .modal-overlay{padding:10px}.modal{padding:16px}
+  .field input,.form-field input,.form-field select{font-size:16px}
+  .section-header h2{font-size:18px}
+  .card-title{font-size:16px}
+  /* الجداول تتحول إلى بطاقات */
+  .table-wrap{overflow:visible}
+  table.data-table,table.data-table tbody,table.data-table tfoot,table.data-table tr,table.data-table td{display:block;width:100%}
+  table.data-table thead{display:none}
+  table.data-table tr{border:1px solid #e2e8f0;border-radius:12px;margin-bottom:12px;padding:6px;background:#fff}
+  table.data-table td{display:flex;justify-content:space-between;align-items:center;gap:10px;border:none;padding:7px 8px;text-align:left;white-space:normal!important;flex-wrap:wrap}
+  table.data-table td::before{content:attr(data-label);font-weight:bold;color:#1e3a8a;text-align:right}
+  table.data-table td[colspan]{justify-content:flex-start}
+}
+
+/* صفوف من عمودين على الهاتف */
+@media(max-width:600px){
+  .keep2.grid-2,.keep2.grid-3{grid-template-columns:1fr 1fr!important;gap:8px}
+  .keep2 .form-field{min-width:0;margin-bottom:6px}
+  .keep2 .form-field label{font-size:12px;margin-bottom:4px}
+  .keep2 input,.keep2 select{min-width:0;padding:9px 8px}
+  .keep2 input[type=datetime-local]{font-size:13px;padding:9px 4px}
+}
+/* ===== زر تثبيت التطبيق (أسفل النافذة) ===== */
+/* ===== زر تثبيت التطبيق (أسفل النافذة) ===== */
+#installBar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 2000;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(135deg, #0f2027, #2c5364);
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+}
+body.has-install-bar #bookConfirmBar { bottom: 62px; }
+#installBar.show { display: flex; }
+#installBar .install-text { font-size: 13px; font-weight: 600; }
+#installBar .install-btn {
+  background: linear-gradient(135deg, #047413, #099c1c);
+  color: #000; border: none; border-radius: 10px;
+  padding: 9px 18px; font-weight: 700; cursor: pointer;
+  font-family: 'Cairo', sans-serif; font-size: 14px;
+}
+body.has-install-bar { padding-bottom: 80px; }
+/* العنوان والرقم في نفس الصف داخل بطاقات الإحصائيات */
+.stat-card{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stat-label{margin-bottom:0}
+@media(max-width:600px){
+  .stat-card{padding:12px}
+  .stat-label{font-size:12px}
+  .stat-value{font-size:18px}
+}
+/* الأيقونات في صف واحد */
+.admin-menu{flex-wrap:nowrap}
+.admin-menu .menu-item{flex-shrink:0}
+@media(max-width:600px){
+  .admin-menu{gap:6px;padding:10px 8px;overflow-x:auto}
+  .admin-menu .menu-item{flex:1;min-width:0;padding:6px 2px;text-align:center}
+  .admin-menu .menu-label{font-size:11px;line-height:1.1}
+  .admin-menu .menu-icon{font-size:20px}
+}
+
+/* جدول تقرير السيارات */
+@media(max-width:600px){ table.data-table.keep-table.rep-table{min-width:620px} }
+
+/* شريط المجاميع الثابت */
+.totals-bar{position:sticky;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:14px 14px 0 0;padding:12px 16px;box-shadow:0 -4px 16px rgba(0,0,0,.2)}
+.totals-bar .tb-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;text-align:center}
+.totals-bar .tb-item b{font-size:17px}
+.totals-bar .g{color:#6ee7b7}.totals-bar .r{color:#fca5a5}
+body.has-install-bar .totals-bar{bottom:62px}
+@media(max-width:600px){
+  .totals-bar{padding:10px 6px;gap:4px}
+  .totals-bar .tb-item{font-size:11px}
+  .totals-bar .tb-item b{font-size:14px}
+}
+#userIdDisplay{direction:ltr;unicode-bidi:plaintext}
+.loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;justify-content:center;align-items:center;flex-direction:column;gap:14px;z-index:4000}
+.loading-overlay.show{display:flex}
+.spinner{width:56px;height:56px;border:6px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.loading-text{color:#fff;font-weight:bold;font-size:15px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+
+</style>
+</head>
+<body>
+
+<!-- تسجيل الدخول -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="company-logo">🚗</div>
+    <div class="company-name">شركة الأمانة لتأجير السيارات</div>
+    <div class="company-sub">نظام إدارة الحجوزات</div>
+    <div class="field"><label>رقم الهاتف</label><input type="tel" id="loginPhone" placeholder="أدخل رقم الهاتف"></div>
+    <div class="field"><label id="passLabel">كلمة المرور</label><input type="password" id="loginPassword" placeholder="أدخل كلمة المرور"></div>
+    <div class="field" id="newPassField" style="display:none"><label>كلمة المرور الجديدة</label><input type="password" id="newPassword" placeholder="غيّر كلمة المرور"></div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">تسجيل الدخول</button>
+    <button class="btn-primary" id="confirmRegBtn" style="display:none" onclick="doRegister()">✅ تأكيد</button>
+    <div class="error-msg" id="loginError"></div>
+    <div class="hint"><a href="#" id="toggleModeLink" onclick="toggleRegister();return false">مستخدم جديد؟ سجّل الآن</a></div>
+  </div>
+</div>
+
+<!-- التطبيق -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-left"><div class="topbar-logo">🚗</div><div class="topbar-title">شركة الأمانة لتأجير السيارات</div></div>
+    <div class="topbar-right">
+      <div class="user-info"><span id="adminBadge" class="admin-badge" style="display:none">🛡️ أدمن</span><span>👤</span><span id="userIdDisplay">-</span></div>
+     <button class="logout-btn" onclick="doLogout()" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2v10"/>
+    <path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>
+  </svg>
+</button>
+    </div>
+  </div>
+  <div class="admin-menu" id="adminMenu" style="display:none">
+    <div class="menu-item" data-page="orders" onclick="showPage('orders')"><div class="menu-icon">📋</div><div class="menu-label">الطلبات</div></div>
+    <div class="menu-item" data-page="adminBooking" onclick="showPage('adminBooking')"><div class="menu-icon">📝</div><div class="menu-label">إضافة حجز</div></div>
+    <div class="menu-item" data-page="addCar" onclick="showPage('addCar')"><div class="menu-icon">➕</div><div class="menu-label">إضافة سيارة</div></div>
+    <div class="menu-item" data-page="invoices" onclick="showPage('invoices')"><div class="menu-icon">💰</div><div class="menu-label">الفواتير</div></div>
+      <div class="menu-item" data-page="carsReport" onclick="showPage('carsReport')"><div class="menu-icon">🚘</div><div class="menu-label">تقرير السيارات</div></div>
+       <div class="menu-item" data-page="users" onclick="showPage('users')"><div class="menu-icon">👥</div><div class="menu-label">المستخدمون</div></div>
+  </div>
+  <div class="admin-menu" id="userMenu" style="display:none">
+  <div class="menu-item" data-page="booking" onclick="showPage('booking')"><div class="menu-icon">📝</div><div class="menu-label">حجز جديد</div></div>
+  <div class="menu-item" data-page="myOrders" onclick="showPage('myOrders')"><div class="menu-icon">📋</div><div class="menu-label">طلباتي</div></div>
+</div>
+  <div class="content" id="mainContent"></div>
+  <div class="print-area" id="printArea"></div>
+</div>
+
+<!-- تفاصيل الطلب -->
+<div class="modal-overlay" id="orderModal"><div class="modal">
+  <div class="modal-header"><h3>📄 تفاصيل الطلب</h3><button class="modal-close" onclick="closeModal('orderModal')">✕</button></div>
+  <div id="orderModalContent"></div>
+</div></div>
+
+<!-- إضافة / تعديل سيارة -->
+<div class="modal-overlay" id="carModal"><div class="modal">
+  <div class="modal-header"><h3 id="carModalTitle">🚙 إضافة سيارة جديدة</h3><button class="modal-close" onclick="closeModal('carModal')">✕</button></div>
+  <input type="hidden" id="carId">
+  <div class="grid-2 keep2">
+    <div class="form-field"><label>وكالة السيارة</label><input type="text" id="carAgency" placeholder="مثال: وكالة الفهد"></div>
+    <div class="form-field"><label>اسم السيارة</label><input type="text" id="carName" placeholder="مثال: تويوتا كامري"></div>
+  <div class="form-field"><label>نوع السيارة</label>
+  <select id="carType">
+    <option value="">اختر نوع السيارة</option>
+    <option value="سيدان">سيدان</option>
+    <option value="دفع رباعي">دفع رباعي</option>
+    <option value="هاتش باك">هاتش باك</option>
+    <option value="باص">باص</option>
+    <option value="دراجة">دراجة</option>
+    <option value="شاحنة">شاحنة</option>
+    <option value="قاطرة مقطورة">قاطرة مقطورة</option>
+    <option value="رافعة">رافعة</option>
+    <option value="كرفان">كرفان</option>
+    <option value="اخرى">اخرى</option>
+  </select></div>
+  <div class="form-field"><label>الرقم والرمز</label><input type="text" id="carPlate" placeholder="مثال: A 12345"></div>
+    <div class="form-field"><label>رقم المفتاح</label><input type="text" id="carKey" placeholder="مثال: K-01"></div>
+    <div class="form-field"><label>مبلغ الإيجار بالساعة</label><input type="number" id="carPrice" placeholder="مثال: 5" min="0" step="any"></div>
+    <div class="form-field" style="grid-column:1/-1">
+      <label>صورة السيارة</label>
+      <input type="file" id="carImgFile" accept="image/*" onchange="previewCarImage(event)">
+      <div id="carPreview" style="margin-top:10px;display:none"><img id="carPreviewImg" style="max-width:100%;max-height:180px;border-radius:10px;border:2px solid #e2e8f0"></div>
+    </div>
+  </div>
+  <div class="actions"><button class="btn-save" onclick="saveCar()">💾 حفظ السيارة</button></div>
+</div></div>
+
+<!-- تعديل الطلب -->
+<div class="modal-overlay" id="editOrderModal"><div class="modal">
+  <div class="modal-header"><h3>✏️ تعديل الطلب</h3><button class="modal-close" onclick="closeModal('editOrderModal')">✕</button></div>
+  <input type="hidden" id="editOrderId">
+  <div class="grid-2">
+    <div class="form-field"><label>الاسم الثلاثي</label><input type="text" id="editFullName"></div>
+    <div class="form-field"><label>القبيلة</label><input type="text" id="editTribe"></div>
+    <div class="form-field"><label>رقم الهاتف</label><input type="tel" id="editPhone"></div>
+    <div class="form-field"><label>رقم هاتف إضافي (اختياري)</label><input type="tel" id="editPhone2"></div>
+    <div class="form-field"><label>البريد الإلكتروني (اختياري)</label><input type="email" id="editEmail"></div>
+    <div class="form-field"><label>الرقم المدني</label><input type="text" id="editCivilId"></div>
+     <div class="form-field" style="grid-column:1/-1"><hr style="border:none;border-top:1px solid #e2e8f0;margin:6px 0"><h4 style="color:#1e3a8a;margin-top:10px">🚙 بيانات السيارة</h4></div>
+    <div class="form-field" style="grid-column:1/-1"><label>تغيير السيارة (اختياري)</label>
+      <select id="editCarSelect" onchange="fillEditCar(this.value)"></select></div>
+    <div class="form-field"><label>وكالة السيارة</label><input type="text" id="editCarAgency"></div>
+    <div class="form-field"><label>اسم السيارة</label><input type="text" id="editCarName"></div>
+    <div class="form-field"><label>نوع السيارة</label><input type="text" id="editCarType"></div>
+    <div class="form-field"><label>الرقم والرمز</label><input type="text" id="editCarPlate"></div>
+    <div class="form-field"><label>رقم المفتاح</label><input type="text" id="editCarKey"></div>
+    <div class="form-field"><label>سعر الساعة</label><input type="number" id="editCarPrice" min="0" step="any" oninput="updateEditCalc()"></div>
+    <div class="form-field"><label>تاريخ الاستلام</label><input type="datetime-local" id="editPickupDate" onchange="updateEditCalc()"></div>
+    <div class="form-field"><label>تاريخ الإرجاع</label><input type="datetime-local" id="editReturnDate" onchange="updateEditCalc()"></div>
+    <div class="form-field"><label>عدد الساعات</label><input type="text" id="editHoursDisplay" readonly></div>
+    <div class="form-field"><label>المبلغ الإجمالي</label><input type="text" id="editTotalDisplay" readonly style="font-weight:bold;color:#059669"></div>
+    <div class="form-field"><label>المدفوع</label><input type="number" id="editPaidAmount" min="0" step="any" oninput="updateEditCalc()"></div>
+    <div class="form-field"><label>الباقي</label><input type="text" id="editRemainingDisplay" readonly style="font-weight:bold;color:#dc2626"></div>
+    <div class="form-field"><label>حالة الطلب</label>
+      <select id="editStatus"><option value="pending">⏳ قيد الانتظار</option><option value="approved">✅ تم الموافقة</option><option value="rejected">❌ مرفوض</option></select></div>
+    <div class="form-field"><label>حالة الاستلام</label>
+      <select id="editReceiveStatus" onchange="$('editReceiveUpdated').value=nowStamp()"><option value="waiting">⏳ انتظار الاستلام</option><option value="received">🚗 تم الاستلام</option><option value="returned">✅ تم الإرجاع</option></select></div>
+    <div class="form-field" style="grid-column:1/-1"><label>تاريخ ووقت تحديث الحالة</label><input type="text" id="editReceiveUpdated" readonly></div>
+  </div>
+  <div class="actions"><button class="btn-save" onclick="updateOrder()">💾 حفظ التعديلات</button></div>
+</div></div>
+
+<!-- تعديل مستخدم -->
+<div class="modal-overlay" id="userModal"><div class="modal">
+  <div class="modal-header"><h3>✏️ تعديل المستخدم</h3><button class="modal-close" onclick="closeModal('userModal')">✕</button></div>
+  <input type="hidden" id="uId">
+  <div class="grid-2 keep2">
+    <div class="form-field"><label>اسم العميل</label><input type="text" id="uName"></div>
+    <div class="form-field"><label>القبيلة</label><input type="text" id="uTribe"></div>
+    <div class="form-field"><label>رقم الهاتف</label><input type="tel" id="uPhone"></div>
+    <div class="form-field"><label>كلمة المرور</label><input type="text" id="uPass"></div>
+    <div class="form-field"><label>هاتف إضافي</label><input type="tel" id="uPhone2"></div>
+    <div class="form-field"><label>البريد الإلكتروني</label><input type="email" id="uEmail"></div>
+    <div class="form-field"><label>الرقم المدني</label><input type="text" id="uIdCard"></div>
+    <div class="form-field"><label>حالة المستخدم</label>
+      <select id="uState"><option value="User">User (مستخدم)</option><option value="Admin">Admin (أدمن)</option><option value="Blocked">Blocked (موقوف)</option></select></div>
+  </div>
+  <div class="actions"><button class="btn-save" onclick="saveUser()">💾 حفظ التعديلات</button></div>
+</div></div>
+
+
+
+
+
+<!-- ============ شريط تثبيت التطبيق ============ -->
+<div id="installBar">
+  <span class="install-text" id="installText"></span>
+  <button class="install-btn" id="installBtn">تثبيت التطبيق📲</button>
+</div>
+
+
+<div id="noteSuggest" class="note-suggest"></div>
+
+<!-- نافذة الواتس اب -->
+<div class="modal-overlay" id="waModal">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <h3>💬 إرسال عبر الواتس اب</h3>
+      <button class="close-btn" onclick="closeWaModal()">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="reg-note" style="margin-bottom:10px;">هل تريد إرسال الطلب إلى المستخدم بالواتس اب؟</div>
+      <div class="info-line"><span>إلى:</span><span id="waTo" style="direction:ltr">-</span></div>
+      <div class="field">
+        <label>نص الرسالة (يمكنك تعديله)</label>
+        <textarea id="waText" rows="9"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-top:14px;">
+        <button class="btn green" onclick="sendWhatsApp()">✅ نعم، إرسال</button>
+        <button class="btn red" onclick="closeWaModal()">لا</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">جارٍ الحفظ ...</div></div>
+<script>
+const $ = i => document.getElementById(i);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const NOIMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'><rect width='100%25' height='100%25' fill='%23e2e8f0'/><text x='50%25' y='58%25' text-anchor='middle' font-size='60'>🚗</text></svg>";
+
+/* ============ البيانات ============ */
+const users = [
+  { phone: "99999999", password: "admin123", name: "المدير", role: "admin" },
+  { phone: "11111111", password: "user123", name: "مستخدم عادي", role: "user" }
+];
+const defaultCars = [
+  { id: 1, agency: "وكالة الفهد", name: "تويوتا كامري", type: "سيدان", plate: "A 12345", keyNumber: "K-01", price: 5, img: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400" },
+  { id: 2, agency: "وكالة النخبة", name: "نيسان باترول", type: "دفع رباعي", plate: "B 67890", keyNumber: "K-02", price: 12, img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400" },
+  { id: 3, agency: "وكالة السلام", name: "هيونداي إلنترا", type: "سيدان", plate: "C 11223", keyNumber: "K-03", price: 4, img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400" },
+  { id: 4, agency: "وكالة المستقبل", name: "لكزس ES", type: "فاخرة", plate: "D 44556", keyNumber: "K-04", price: 15, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400" }
+];
+let cars = JSON.parse(localStorage.getItem("cars") || "null") || defaultCars;
+let bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+let currentUser = null, selectedCar = null;
+
+const saveData = () => {
+  localStorage.setItem("cars", JSON.stringify(cars));
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+};
+function nowStamp() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+const RECEIVE_LABELS = { waiting: "⏳ انتظار الاستلام", received: "🚗 تم الاستلام", returned: "✅ تم الإرجاع" };
+const receiveLabel = s => RECEIVE_LABELS[s || "waiting"];
+function fmtHours(h) {
+  h = Math.round(h) || 0;
+  if (h <= 0) return "0";
+  const unit = (n, one, two, few, many) => n === 1 ? one : n === 2 ? two : n <= 10 ? `${n} ${few}` : `${n} ${many}`;
+  const d = Math.floor(h / 24), r = h % 24, parts = [];
+  if (d) parts.push(unit(d, "يوم", "يومان", "أيام", "يوماً"));
+  if (r) parts.push(unit(r, "ساعة", "ساعتان", "ساعات", "ساعة"));
+  return parts.join(" و ");
+}
+const hoursBetween = (a, b) => { const d = new Date(b) - new Date(a); return d > 0 ? Math.ceil(d / 36e5) : 0; };
+const paidOf = b => b.paidAmount ?? (b.paid ? (b.totalAmount || 0) : 0);
+const remainingOf = b => Math.max((b.totalAmount || 0) - paidOf(b), 0);
+
+
+function doLogout() {
+  currentUser = null; selectedCar = null;
+   fillSavedCredentials();
+  $("appScreen").style.display = "none";
+  $("loginScreen").style.display = "flex";
+    if (registerMode) toggleRegister();
+}
+function showPage(page) {
+  document.querySelectorAll(".menu-item").forEach(el => el.classList.toggle("active", el.dataset.page === page));
+  const c = $("mainContent");
+  if (page === "orders") renderOrdersPage(c);
+  else if (page === "addCar") renderCarsPage(c);
+  else if (page === "invoices") renderInvoicesPage(c);
+  else if (page === "adminBooking") renderBookingForm(c, true);
+  else if (page === "booking") renderBookingForm(c, false);
+  else if (page === "myOrders") renderMyOrders(c);
+  else if (page === "carsReport") renderCarsReport(c);
+    else if (page === "users") renderUsersPage(c);
+  labelTables();
+}
+function labelTables() {
+  document.querySelectorAll("table.data-table").forEach(t => {
+    const h = [...t.querySelectorAll("thead th")].map(x => x.textContent.trim());
+    t.querySelectorAll("tbody tr").forEach(r => [...r.children].forEach((td, i) => td.setAttribute("data-label", h[i] || "")));
+  });
+}
+const closeModal = id => $(id).classList.remove("show");
+
+/* ============ الطلبات ============ */
+function statusBadge(s) {
+  return ({
+    pending: '<span class="status-badge status-pending">⏳ قيد الانتظار</span>',
+    approved: '<span class="status-badge status-approved">✅ تم الموافقة</span>',
+    rejected: '<span class="status-badge status-rejected">❌ مرفوض</span>'
+  })[s] || s;
+}
+const receiveBadge = s => `<span class="status-badge status-recv">${receiveLabel(s)}</span>`;
+
+function renderOrdersPage(c) {
+  const n = s => bookings.filter(b => b.status === s).length;
+  c.innerHTML = `
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">📋 إجمالي الطلبات</div><div class="stat-value">${bookings.length}</div></div>
+      <div class="stat-card orange"><div class="stat-label">⏳ قيد الانتظار</div><div class="stat-value orange">${n("pending")}</div></div>
+      <div class="stat-card green"><div class="stat-label">✅ تم الموافقة</div><div class="stat-value green">${n("approved")}</div></div>
+      <div class="stat-card red"><div class="stat-label">❌ مرفوضة</div><div class="stat-value red">${n("rejected")}</div></div>
+      
+    </div>
+    <div class="card">
+      <div class="card-title">📋 قائمة الطلبات</div>
+      ${bookings.length === 0 ? `<div class="empty-state"><div class="icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>` : `
+      <div class="table-wrap keep-table"><table class="data-table keep-table">
+        <thead><tr><th>#</th><th>اسم العميل</th><th>الهاتف</th><th>السيارة</th><th>تاريخ الاستلام</th><th>الإجمالي</th><th>المدفوع</th><th>الباقي</th><th>الحالة</th><th>الاستلام</th><th>إجراءات</th></tr></thead>
+        <tbody>${bookings.map((b, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${esc(b.fullName)}</td>
+            <td>${esc(b.phone)}</td>
+            <td>${esc(b.car?.name || "-")}</td>
+            <td>${b.pickupDate ? esc(b.pickupDate.replace("T", " ")) : "-"}</td>
+            <td><b>${b.totalAmount || 0} ريال</b></td>
+            <td>${paidOf(b)} ريال</td>
+            <td style="color:${remainingOf(b) ? "#dc2626" : "#059669"};font-weight:bold">${remainingOf(b)} ريال</td>
+            <td>${statusBadge(b.status)}</td>
+            <td>${receiveBadge(b.receiveStatus)}<div style="font-size:11px;color:#94a3b8;margin-top:3px">${esc(b.receiveUpdatedAt || "")}</div></td>
+            <td style="white-space:nowrap">
+              <button class="btn-sm btn-view" onclick="viewOrder(${b.id})">👁️ عرض</button>
+              <button class="btn-sm btn-edit" onclick="openEditOrder(${b.id})">✏️ تعديل</button>
+              <button class="btn-sm btn-delete" onclick="deleteOrder(${b.id})">🗑️</button>
+            </td>
+          </tr>`).join("")}
+        </tbody></table></div>`}
+    </div>`;
+}
+
+
+function renderMyOrders(c) {
+  const mine = bookings.filter(b => b.ownerPhone === currentUser?.phone);
+  c.innerHTML = `
+    <div class="card">
+      <div class="card-title">📋 طلباتي</div>
+      ${mine.length === 0 ? `<div class="empty-state"><div class="icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>` : `
+      <div class="table-wrap keep-table"><table class="data-table keep-table">
+        <thead><tr><th>#</th><th>السيارة</th><th>تاريخ الاستلام</th><th>الإجمالي</th><th>المدفوع</th><th>الباقي</th><th>الحالة</th><th>الاستلام</th><th>إجراء</th></tr></thead>
+        <tbody>${mine.map((b, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${esc(b.car?.name || "-")}</td>
+            <td>${b.pickupDate ? esc(b.pickupDate.replace("T", " ")) : "-"}</td>
+            <td><b>${b.totalAmount || 0} ريال</b></td>
+            <td>${paidOf(b)} ريال</td>
+            <td style="color:${remainingOf(b) ? "#dc2626" : "#059669"};font-weight:bold">${remainingOf(b)} ريال</td>
+            <td>${statusBadge(b.status)}</td>
+            <td>${receiveBadge(b.receiveStatus)}<div style="font-size:11px;color:#94a3b8;margin-top:3px">${esc(b.receiveUpdatedAt || "")}</div></td>
+            <td style="white-space:nowrap"><button class="btn-sm btn-view" onclick="viewOrder(${b.id})">👁️ عرض</button></td>
+          </tr>`).join("")}
+        </tbody></table></div>`}
+    </div>`;
+}
+
+function viewOrder(id) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  const isAdmin = currentUser?.role === "admin";
+  const sep = '<hr style="margin:15px 0;border:none;border-top:1px solid #e2e8f0">';
+  const box = 'flex:1;min-width:260px;border:2px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc';
+  const boxTitle = 'color:#1e3a8a;margin-bottom:10px;font-size:15px';
+
+  $("orderModalContent").innerHTML = `
+    <div class="grid-2">
+      <div><b>الاسم الثلاثي:</b> ${esc(b.fullName)}</div>
+      <div><b>القبيلة:</b> ${esc(b.tribe || "-")}</div>
+      <div><b>رقم الهاتف:</b> ${esc(b.phone)}</div>
+      <div><b>هاتف إضافي:</b> ${esc(b.phone2 || "-")}</div>
+      <div><b>البريد الإلكتروني:</b> ${esc(b.email || "-")}</div>
+      <div><b>الرقم المدني:</b> ${esc(b.civilId)}</div>
+      <div><b>تاريخ الاستلام:</b> ${esc(b.pickupDate)}</div>
+      <div><b>تاريخ الإرجاع:</b> ${esc(b.returnDate)}</div>
+      <div><b>عدد الساعات:</b> ${fmtHours(b.hours)}</div>
+      <div><b>المبلغ الإجمالي:</b> ${b.totalAmount || 0} ريال</div>
+      <div><b>المدفوع:</b> ${paidOf(b)} ريال</div>
+      <div><b>الباقي:</b> ${remainingOf(b)} ريال</div>
+      <div><b>حالة الاستلام:</b> ${receiveBadge(b.receiveStatus)}</div>
+      <div><b>آخر تحديث للحالة:</b> ${esc(b.receiveUpdatedAt || "-")}</div>
+    </div>
+    ${sep}
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:stretch">
+      <div style="${box}">
+        <h4 style="${boxTitle}">🚙 بيانات السيارة</h4>
+        <div style="display:grid;gap:8px;font-size:14px">
+          <div><b>الوكالة:</b> ${esc(b.car?.agency || "-")}</div>
+          <div><b>الاسم:</b> ${esc(b.car?.name || "-")}</div>
+          <div><b>النوع:</b> ${esc(b.car?.type || "-")}</div>
+          <div><b>الرقم والرمز:</b> ${esc(b.car?.plate || "-")}</div>
+          <div><b>رقم المفتاح:</b> ${esc(b.car?.keyNumber || "-")}</div>
+          <div><b>السعر/ساعة:</b> ${b.car?.price || 0} ريال</div>
+          <div><b>حالة الطلب:</b> ${statusBadge(b.status)}</div>
+        </div>
+      </div>
+      ${b.idCardImage ? `
+      <div style="${box};text-align:center">
+        <h4 style="${boxTitle};text-align:right">🪪 البطاقة الشخصية</h4>
+        <img src="${b.idCardImage}" style="max-width:100%;max-height:260px;border-radius:8px;border:1px solid #cbd5e1">
+      </div>` : ""}
+    </div>
+    <div class="actions">
+      ${isAdmin && b.status === "pending" ? `<button class="btn-save" style="background:#10b981" onclick="setStatus(${b.id},'approved');closeModal('orderModal')">✅ موافقة</button><button class="btn-save" style="background:#dc2626" onclick="setStatus(${b.id},'rejected');closeModal('orderModal')">❌ رفض</button>` : ""}
+      ${isAdmin && b.status === "approved" && remainingOf(b) > 0 ? `<button class="btn-save" style="background:#059669" onclick="markPaid(${b.id});closeModal('orderModal');showPage('orders')">💵 تسجيل الدفع كاملاً</button>` : ""}
+      <button class="btn-print" onclick="printDoc(${b.id},false)">🖨️ طباعة</button>
+    </div>`;
+  $("orderModal").classList.add("show");
+}
+
+function setStatus(id, status) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  b.status = status; saveData(); showPage("orders");
+}
+function markPaid(id) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  b.paidAmount = b.totalAmount || 0; b.paid = true; saveData();
+}
+function deleteOrder(id) {
+  if (!confirm("هل أنت متأكد من حذف الطلب؟")) return;
+  bookings = bookings.filter(x => x.id !== id); saveData(); showPage("orders");
+}
+
+/* ============ السيارات ============ */
+function carCard(c, extra, attrs = "") {
+  return `<div class="car-item" ${attrs}>
+    <img src="${c.img}" alt="${esc(c.name)}" onerror="this.src=NOIMG">
+    <div class="c-name">${esc(c.name)}</div>
+    <div class="c-info">🏢 ${esc(c.agency)}</div>
+    <div class="c-info">🚘 ${esc(c.type)}</div>
+    <div class="c-info">🔢 ${esc(c.plate)}</div>
+    <div class="c-info">🔑 ${esc(c.keyNumber || "-")}</div>
+    <div class="c-price">💰 ${c.price} ريال / ساعة</div>${extra}</div>`;
+}
+function renderCarsPage(c) {
+  c.innerHTML = `
+    <div class="section-header">
+      <h2>🚙 إدارة السيارات <span class="badge-count">${cars.length} سيارة</span></h2>
+     <button class="main-btn" onclick="openCarModal()">➕ إضافة سيارة</button>
+    </div>
+      ${cars.length === 0 ? `<div class="empty-state"><div class="icon">🚗</div><p>لا توجد سيارات مضافة</p></div>` :
+      `<div class="car-list">${cars.map(x => carCard(x, `
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn-sm btn-edit" style="flex:1;padding:8px" onclick="openCarModal(${x.id})">✏️ تعديل</button>
+          <button class="btn-sm btn-delete" style="flex:1;padding:8px" onclick="deleteCar(${x.id})">🗑️ حذف</button>
+        </div>`)).join("")}</div>`}
+    </div>`;
+}
+function previewCarImage(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => { $("carPreviewImg").src = ev.target.result; $("carPreview").style.display = "block"; };
+  r.readAsDataURL(f);
+}
+function openCarModal(id) {
+  const c = id ? cars.find(x => x.id === id) : null;
+  $("carModalTitle").textContent = c ? "✏️ تعديل السيارة" : "🚙 إضافة سيارة جديدة";
+  $("carId").value = c ? c.id : "";
+  $("carAgency").value = c?.agency || "";
+  $("carName").value = c?.name || "";
+    const sel = $("carType"), t = c?.type || "";
+  sel.querySelectorAll("option[data-extra]").forEach(o => o.remove());
+  if (t && ![...sel.options].some(o => o.value === t)) {   // نوع قديم غير موجود في القائمة (مثل "فاخرة")
+    const o = new Option(t, t); o.dataset.extra = "1"; sel.add(o);
+  }
+  sel.value = t;
+  $("carPlate").value = c?.plate || "";
+  $("carKey").value = c?.keyNumber || "";
+  $("carPrice").value = c?.price || "";
+  $("carImgFile").value = "";
+  $("carPreviewImg").src = c?.img || "";
+  $("carPreview").style.display = c ? "block" : "none";
+  $("carModal").classList.add("show");
+}
+function saveCar() {
+  const id = $("carId").value;
+  const agency = $("carAgency").value.trim(), name = $("carName").value.trim(), type = $("carType").value.trim();
+  const plate = $("carPlate").value.trim(), keyNumber = $("carKey").value.trim();
+  const price = parseFloat($("carPrice").value), file = $("carImgFile").files[0];
+  if (!agency || !name || !type || !plate || !price) { alert("⚠️ الرجاء تعبئة جميع الحقول المطلوبة"); return; }
+  const finalize = img => {
+    if (id) {
+      const c = cars.find(x => String(x.id) === id);
+      Object.assign(c, { agency, name, type, plate, keyNumber, price });
+      if (img) c.img = img;
+    } else {
+      cars.push({ id: cars.length ? Math.max(...cars.map(c => c.id)) + 1 : 1, agency, name, type, plate, keyNumber, price, img: img || NOIMG });
+    }
+    saveData(); closeModal("carModal"); showPage("addCar");
+    alert(id ? "✅ تم تعديل السيارة بنجاح" : "✅ تم إضافة السيارة بنجاح");
+  };
+  if (file) { const r = new FileReader(); r.onload = e => finalize(e.target.result); r.readAsDataURL(file); }
+  else finalize("");
+}
+function deleteCar(id) {
+  if (!confirm("هل أنت متأكد من حذف السيارة؟")) return;
+  cars = cars.filter(c => c.id !== id); saveData(); showPage("addCar");
+}
+
+/* ============ الفواتير ============ */
+function renderInvoicesPage(c) {
+  const list = bookings.filter(b => b.status === "approved");
+  const paid = list.reduce((s, b) => s + paidOf(b), 0);
+  const unpaid = list.reduce((s, b) => s + remainingOf(b), 0);
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card orange"><div class="stat-label">🧾 عدد الفواتير</div><div class="stat-value orange">${list.length}</div></div>
+      <div class="stat-card"><div class="stat-label">📊 إجمالي المبالغ</div><div class="stat-value">${paid + unpaid} ريال</div></div>
+      <div class="stat-card green"><div class="stat-label">💵 المبالغ المدفوعة</div><div class="stat-value green">${paid} ريال</div></div>
+      <div class="stat-card red"><div class="stat-label">💰 المتبقي</div><div class="stat-value red">${unpaid} ريال</div></div>
+    </div>
+    <div class="card"><div class="card-title">🧾 تقرير الفواتير</div>
+      ${list.length === 0 ? `<div class="empty-state"><div class="icon">🧾</div><p>لا توجد فواتير (لا توجد طلبات موافق عليها)</p></div>` : `
+      <div class="table-wrap keep-table"><table class="data-table keep-table">
+        <thead><tr><th>#</th><th>العميل</th><th>الهاتف</th><th>السيارة</th><th>الساعات</th><th>سعر الساعة</th><th>الإجمالي</th><th>المدفوع</th><th>الباقي</th><th>إجراء</th></tr></thead>
+        <tbody>${list.map((b, i) => `<tr>
+          <td>${i + 1}</td><td>${esc(b.fullName)}</td><td>${esc(b.phone)}</td><td>${esc(b.car?.name || "-")}</td>
+          <td>${fmtHours(b.hours)}</td><td>${b.car?.price || 0} ريال</td><td><b>${b.totalAmount || 0} ريال</b></td>
+          <td>${paidOf(b)} ريال</td>
+          <td>${remainingOf(b) ? `<span class="status-badge status-unpaid">${remainingOf(b)} ريال</span>` : '<span class="status-badge status-paid">✅ مسدد</span>'}</td>
+          <td style="white-space:nowrap">
+            ${remainingOf(b) ? `<button class="btn-sm btn-paid" onclick="markPaid(${b.id});showPage('invoices')">💵 تسجيل الدفع</button>` : ""}
+            <button class="btn-sm btn-view" onclick="printDoc(${b.id},true)">🖨️ طباعة</button>
+          </td></tr>`).join("")}</tbody>
+        <tfoot><tr style="background:#f1f5f9;font-weight:bold">
+          <td colspan="6" style="padding:12px;text-align:left">الإجمالي:</td>
+          <td style="padding:12px;color:#1e3a8a">${paid + unpaid} ريال</td><td colspan="3"></td></tr></tfoot>
+      </table></div>`}
+    </div>`;
+}
+
+/* ============ الطباعة (طلب / فاتورة) ============ */
+function printDoc(id, invoice) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  const td = 'style="padding:8px;border:1px solid #cbd5e1;'
+  const row = (k, v, hl) => `<tr${hl ? ' style="background:#ecfdf5"' : ""}><td ${td}background:#f1f5f9;width:35%"><b>${k}</b></td><td ${td}">${v}</td></tr>`;
+  const tbl = rows => `<table style="width:100%;border-collapse:collapse;margin-bottom:20px">${rows}</table>`;
+  const h3 = t => `<h3 style="color:#1e3a8a;margin-bottom:10px">${t}</h3>`;
+  $("printArea").innerHTML = `
+    <div style="text-align:center;margin-bottom:20px;border-bottom:3px solid #1e3a8a;padding-bottom:15px">
+      <h1 style="color:#1e3a8a">شركة الأمانة لتأجير السيارات</h1>
+      <p style="color:#64748b">${invoice ? "فاتورة إيجار سيارة" : "نموذج حجز سيارة"}</p>
+      ${invoice ? `<p style="color:#64748b;font-size:12px">رقم الفاتورة: INV-${b.id} - التاريخ: ${new Date().toLocaleDateString("ar-OM")}</p>` : ""}
+    </div>
+    ${h3("👤 بيانات العميل")}
+    ${tbl(row("الاسم الثلاثي", esc(b.fullName)) + row("القبيلة", esc(b.tribe || "-")) + row("رقم الهاتف", esc(b.phone)) +
+      row("هاتف إضافي", esc(b.phone2 || "-")) + row("البريد الإلكتروني", esc(b.email || "-")) + row("الرقم المدني", esc(b.civilId)))}
+    ${h3("🚙 بيانات السيارة والإيجار")}
+    ${tbl(row("الوكالة", esc(b.car?.agency || "-")) + row("السيارة", esc(b.car?.name || "-")) + row("النوع", esc(b.car?.type || "-")) +
+      row("الرقم والرمز", esc(b.car?.plate || "-")) + row("رقم المفتاح", esc(b.car?.keyNumber || "-")) +
+      row("تاريخ الاستلام", esc(b.pickupDate)) + row("تاريخ الإرجاع", esc(b.returnDate)) +
+      row("المدة", fmtHours(b.hours)) + row("سعر الساعة", `${b.car?.price} ريال`) +
+      row("المبلغ الإجمالي", `<b style="color:#065f46;font-size:18px">${b.totalAmount} ريال عماني</b>`, true) +
+      row("المدفوع", `${paidOf(b)} ريال`) + row("الباقي", `${remainingOf(b)} ريال`) +
+      row("حالة الاستلام", receiveLabel(b.receiveStatus)) + row("آخر تحديث للحالة", esc(b.receiveUpdatedAt || "-")))}
+    ${!invoice && b.idCardImage ? `<p style="margin-bottom:10px"><b>صورة البطاقة الشخصية:</b></p><img src="${b.idCardImage}" style="max-width:280px;border:1px solid #cbd5e1;border-radius:8px">` : ""}
+    <div style="margin-top:40px;display:flex;justify-content:space-between">
+      <div>توقيع العميل: ______________</div><div>${invoice ? "ختم الشركة" : "توقيع الموظف"}: ______________</div>
+    </div>`;
+  window.print();
+}
+
+/* ============ تقرير السيارات ============ */
+function renderCarsReport(c) {
+  const m = n => +(+n).toFixed(3);
+  const keyOf = x => x?.id != null ? "id:" + x.id : "n:" + (x?.name || "") + "|" + (x?.plate || "");
+  const rows = new Map();
+  cars.forEach(x => rows.set(keyOf(x), { type: x.type, name: x.name, count: 0, total: 0, paid: 0, rem: 0 }));
+
+  bookings.filter(b => b.status === "approved").forEach(b => {
+    const k = keyOf(b.car);
+    if (!rows.has(k)) rows.set(k, { type: b.car?.type || "-", name: b.car?.name || "-", count: 0, total: 0, paid: 0, rem: 0 });
+    const r = rows.get(k);
+    r.count++; r.total += b.totalAmount || 0; r.paid += paidOf(b); r.rem += remainingOf(b);
+  });
+
+  const list = [...rows.values()];
+  const sum = f => list.reduce((s, r) => s + r[f], 0);
+
+  c.innerHTML = `
+    <div class="card"><div class="card-title">🚘 تقرير السيارات</div>
+      ${list.length === 0 ? `<div class="empty-state"><div class="icon">🚗</div><p>لا توجد سيارات</p></div>` : `
+      <div class="table-wrap keep-table"><table class="data-table keep-table rep-table">
+        <thead><tr><th>نوع السيارة</th><th>اسم السيارة</th><th>عدد الحجز</th><th>المبلغ الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+        <tbody>${list.map(r => `<tr>
+          <td>${esc(r.type)}</td><td>${esc(r.name)}</td><td>${r.count}</td>
+          <td><b>${m(r.total)} ريال</b></td>
+          <td style="color:#059669">${m(r.paid)} ريال</td>
+          <td style="color:${r.rem ? "#dc2626" : "#059669"};font-weight:bold">${m(r.rem)} ريال</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`}
+    </div>
+    <div class="totals-bar">
+      <div class="tb-item"><span>عدد الحجوزات</span><b>${sum("count")}</b></div>
+      <div class="tb-item"><span>المبلغ الإجمالي</span><b>${m(sum("total"))}</b></div>
+      <div class="tb-item"><span>المدفوع</span><b class="g">${m(sum("paid"))}</b></div>
+      <div class="tb-item"><span>المتبقي</span><b class="r">${m(sum("rem"))}</b></div>
+    </div>`;
+}
+
+
+/* ============ إدارة المستخدمين ============ */
+const USERS_PAGE_SIZE = 50;
+let usersState = { q: "", page: 1, total: 0, list: [] };
+const adminApi = p => api({ ...p, adminPhone: currentUser.phone, adminPassword: currentUser.password });
+
+function renderUsersPage(c) {
+  usersState = { q: "", page: 1, total: 0, list: [] };
+  c.innerHTML = `
+    <div class="section-header">
+      <h2>👥 إدارة المستخدمين <span class="badge-count" id="usersCount">0</span></h2>
+      <div style="display:flex;gap:8px;flex:1;max-width:440px">
+        <input type="search" id="usersSearch" placeholder="بحث بالاسم أو الهاتف أو البريد أو الرقم المدني"
+          style="flex:1;min-width:0;padding:11px 13px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px"
+          onkeydown="if(event.key==='Enter')searchUsers()">
+        <button class="btn-sm btn-view" style="padding:0 16px;font-size:15px" onclick="searchUsers()">🔍</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">📋 قائمة المستخدمين</div><div id="usersTableBox"></div></div>`;
+  loadUsers();
+}
+
+function searchUsers() {
+  usersState.q = $("usersSearch").value.trim();
+  usersState.page = 1;
+  loadUsers();
+}
+
+function usersGoto(p) { usersState.page = p; loadUsers(); }
+
+async function loadUsers() {
+  const box = $("usersTableBox");
+  box.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><p>جارٍ التحميل...</p></div>`;
+  try {
+    const res = await adminApi({ action: "listUsers", q: usersState.q, page: usersState.page });
+    if (!res.ok) { box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(res.error)}</p></div>`; return; }
+    usersState.list = res.users; usersState.total = res.total;
+    $("usersCount").textContent = res.total;
+    if (!res.users.length) { box.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>لا يوجد مستخدمون</p></div>`; return; }
+
+    const pages = Math.ceil(res.total / USERS_PAGE_SIZE);
+    box.innerHTML = `
+      <div class="table-wrap keep-table"><table class="data-table keep-table">
+        <thead><tr><th>اسم العميل</th><th>القبيلة</th><th>الهاتف</th><th>كلمة المرور</th><th>هاتف إضافي</th><th>البريد</th><th>الرقم المدني</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <tbody>${res.users.map((u, i) => `<tr>
+          <td>${esc(u.CRUserName || "-")}</td>
+          <td>${esc(u.CRUserTribe || "-")}</td>
+          <td>${esc(u.CRUserPhone)}</td>
+          <td>${esc(u.CRUserPass)}</td>
+          <td>${esc(u.CRUserPhone2 || "-")}</td>
+          <td>${esc(u.CRUserEmail || "-")}</td>
+          <td>${esc(u.CRUserIDCard || "-")}</td>
+          <td>${esc(u.CRUserState)}</td>
+          <td style="white-space:nowrap">
+            <button class="btn-sm btn-edit" onclick="openEditUser(${i})">✏️ تعديل</button>
+            <button class="btn-sm btn-reject" onclick="deleteUserRow(${i})">🗑️ حذف</button>
+          </td></tr>`).join("")}</tbody>
+      </table></div>
+      ${pages > 1 ? `<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:15px">
+        <button class="btn-sm btn-view" style="padding:8px 14px" ${usersState.page <= 1 ? "disabled" : ""} onclick="usersGoto(${usersState.page - 1})">السابق</button>
+        <span style="font-size:13px;color:#64748b">صفحة ${usersState.page} من ${pages}</span>
+        <button class="btn-sm btn-view" style="padding:8px 14px" ${usersState.page >= pages ? "disabled" : ""} onclick="usersGoto(${usersState.page + 1})">التالي</button>
+      </div>` : ""}`;
+  } catch (e) {
+    box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>تعذر الاتصال بالخادم</p></div>`;
+  }
+}
+
+function openEditUser(i) {
+  const u = usersState.list[i]; if (!u) return;
+  if (!u.CRUserID) { alert("⚠️ هذا المستخدم بدون رقم CRUserID في الشيت، أضف له رقماً أولاً"); return; }
+  $("uId").value = u.CRUserID;
+  $("uName").value = u.CRUserName;
+  $("uTribe").value = u.CRUserTribe;
+  $("uPhone").value = u.CRUserPhone;
+  $("uPass").value = u.CRUserPass;
+  $("uPhone2").value = u.CRUserPhone2;
+  $("uEmail").value = u.CRUserEmail;
+  $("uIdCard").value = u.CRUserIDCard;
+  const sel = $("uState"), st = u.CRUserState || "";
+  sel.querySelectorAll("option[data-extra]").forEach(o => o.remove());
+  const norm = { admin: "Admin", user: "User", blocked: "Blocked" }[st.toLowerCase()];
+  if (norm) sel.value = norm;
+  else { const o = new Option(st || "—", st); o.dataset.extra = "1"; sel.add(o); sel.value = st; }
+  $("userModal").classList.add("show");
+}
+
+async function saveUser() {
+  const id = $("uId").value;
+  const user = {
+    CRUserName: $("uName").value.trim(), CRUserTribe: $("uTribe").value.trim(),
+    CRUserPhone: $("uPhone").value.trim(), CRUserPass: $("uPass").value,
+    CRUserPhone2: $("uPhone2").value.trim(), CRUserEmail: $("uEmail").value.trim(),
+    CRUserIDCard: $("uIdCard").value.trim(), CRUserState: $("uState").value
+  };
+  if (!/^\d{8,15}$/.test(user.CRUserPhone)) { alert("⚠️ رقم الهاتف غير صحيح"); return; }
+  if (user.CRUserPass.length < 4) { alert("⚠️ كلمة المرور 4 أحرف على الأقل"); return; }
+  showLoading("جارٍ حفظ التعديلات...");
+  try {
+    const res = await adminApi({ action: "adminUpdateUser", id, user });
+    if (!res.ok) { alert("❌ " + res.error); return; }
+    // إذا عدّل الأدمن حسابه نفسه نحدّث بيانات جلسته
+    const old = usersState.list.find(u => u.CRUserID === id);
+    if (old && old.CRUserPhone === currentUser.phone) {
+      currentUser.phone = user.CRUserPhone; currentUser.password = user.CRUserPass;
+      $("userIdDisplay").textContent = currentUser.phone;
+    }
+    closeModal("userModal");
+    await loadUsers();
+  } catch (e) {
+    alert("❌ تعذر الاتصال بالخادم");
+  } finally { hideLoading(); }
+}
+
+async function deleteUserRow(i) {
+  const u = usersState.list[i]; if (!u) return;
+  if (!u.CRUserID) { alert("⚠️ هذا المستخدم بدون رقم CRUserID في الشيت"); return; }
+  if (!confirm(`هل أنت متأكد من حذف المستخدم؟\n${u.CRUserName || ""} - ${u.CRUserPhone}`)) return;
+  showLoading("جارٍ الحذف...");
+  try {
+    const res = await adminApi({ action: "adminDeleteUser", id: u.CRUserID });
+    if (!res.ok) { alert("❌ " + res.error); return; }
+    if (usersState.list.length === 1 && usersState.page > 1) usersState.page--;
+    await loadUsers();
+  } catch (e) {
+    alert("❌ تعذر الاتصال بالخادم");
+  } finally { hideLoading(); }
+}
+
+
+/* ============ الاتصال بـ Google Sheet ============ */
+const API_URL = "https://script.google.com/macros/s/AKfycbxjBqZeq97bVtZT_KWU3k5R2b1NZLp7XTzBL2Z49uai__RjArrcuva0120Xh4tORFOfYQ/exec";
+
+async function api(payload) {
+  const r = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+  return r.json();
+}
+
+/* ============ الدخول والتسجيل ============ */
+let registerMode = false;
+
+function toggleRegister() {
+  registerMode = !registerMode;
+  $("loginError").textContent = "";
+  $("newPassField").style.display = registerMode ? "block" : "none";
+  $("loginBtn").style.display = registerMode ? "none" : "block";
+  $("confirmRegBtn").style.display = registerMode ? "block" : "none";
+  if (registerMode) { $("loginPhone").value = ""; $("loginPassword").value = "123456"; }
+  else fillSavedCredentials();
+  $("loginPassword").readOnly = registerMode;
+  $("newPassword").value = "";
+  $("passLabel").textContent = registerMode ? "كلمة المرور الحالية (الافتراضية)" : "كلمة المرور";
+  $("toggleModeLink").textContent = registerMode ? "لديك حساب؟ تسجيل الدخول" : "مستخدم جديد؟ سجّل الآن";
+}
+
+function setBusy(on) {
+  ["loginBtn", "confirmRegBtn"].forEach(id => { $(id).disabled = on; $(id).style.opacity = on ? ".6" : "1"; });
+  if (on) $("loginError").textContent = "⏳ جارٍ المعالجة...";
+}
+
+function enterApp(u, password) {
+  const admin = String(u.state).trim().toLowerCase() === "admin";
+  currentUser = { phone: u.phone, password, name: u.name || u.phone, role: admin ? "admin" : "user", profile: u };
+    saveCredentials(u.phone, password);
+  $("loginError").textContent = "";
+  $("loginScreen").style.display = "none";
+  $("appScreen").style.display = "block";
+  $("userIdDisplay").textContent = currentUser.phone;
+  $("adminBadge").style.display = admin ? "inline-block" : "none";
+  $("adminMenu").style.display = admin ? "flex" : "none";
+  $("userMenu").style.display = admin ? "none" : "flex";
+  showPage(admin ? "orders" : "booking");
+}
+
+const EXPIRED_PHONE = "95209623";
+function showExpired() {
+  $("loginError").textContent = "";
+  const o = document.createElement("div");
+  o.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;justify-content:center;align-items:center;z-index:3000;padding:15px";
+  o.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:30px 28px;text-align:center;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-size:50px;margin-bottom:10px">⏰</div>
+      <p style="color:#991b1b;font-size:16px;font-weight:bold;line-height:1.9;margin-bottom:18px">
+        نأسف لقد انتهي الاستخدام التجريبي للبرنامج ، لطلب شراء البرنامج الرجاء الاتصال بالرقم :
+        <a href="tel:${EXPIRED_PHONE}" dir="ltr" style="display:block;color:#1e3a8a;font-size:22px;margin-top:6px">${EXPIRED_PHONE}</a>
+      </p>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:12px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer">موافق</button>
+    </div>`;
+  document.body.appendChild(o);
+}
+
+/* ===== تذكّر بيانات الدخول ===== */
+const CRED_KEY = "savedLogin";
+function saveCredentials(phone, password) {
+  try { localStorage.setItem(CRED_KEY, JSON.stringify({ phone, password })); } catch (e) {}
+}
+function fillSavedCredentials() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CRED_KEY) || "null");
+    $("loginPhone").value = s?.phone || "";
+    $("loginPassword").value = s?.password || "";
+  } catch (e) {}
+}
+
+async function doLogin() {
+  const phone = $("loginPhone").value.trim(), password = $("loginPassword").value.trim();
+  if (!phone || !password) { $("loginError").textContent = "⚠️ أدخل رقم الهاتف وكلمة المرور"; return; }
+  setBusy(true);
+  try {
+    const res = await api({ action: "login", phone, password });
+       if (!res.ok) { if (res.expired) showExpired(); else $("loginError").textContent = "❌ " + res.error; return; }
+    enterApp(res.user, password);
+  } catch (e) {
+    $("loginError").textContent = "❌ تعذر الاتصال بالخادم";
+  } finally { setBusy(false); }
+}
+
+async function doRegister() {
+  const phone = $("loginPhone").value.trim(), password = $("newPassword").value.trim();
+  if (!phone) { $("loginError").textContent = "⚠️ أدخل رقم الهاتف"; return; }
+  if (password.length < 4 || password === "123456") { $("loginError").textContent = "⚠️ اختر كلمة مرور جديدة (4 أحرف على الأقل وغير 123456)"; return; }
+  setBusy(true);
+  try {
+    const res = await api({ action: "register", phone, password });
+    if (!res.ok) { $("loginError").textContent = "❌ " + res.error; return; }
+    enterApp(res.user, password);   // يفتح صفحة إضافة حجز
+  } catch (e) {
+    $("loginError").textContent = "❌ تعذر الاتصال بالخادم";
+  } finally { setBusy(false); }
+}
+
+/* ===== تعبئة بيانات المستخدم من الشيت ===== */
+function fillProfile() {
+  const p = currentUser?.profile || {};
+  const map = { fullName: p.name, tribe: p.tribe, phone: currentUser.phone, phone2: p.phone2, email: p.email, civilId: p.idCard };
+  Object.entries(map).forEach(([id, val]) => { if (val && $(id)) $(id).value = val; });
+  // الهاتف والبريد: إذا كان فيهما بيانات لا يمكن تعديلها
+  ["phone", "email"].forEach(id => {
+    const el = $(id);
+    if (el && el.value.trim()) { el.readOnly = true; el.title = "لا يمكن تعديل هذا الحقل"; }
+  });
+}
+
+/* ===== ضغط الصورة لتناسب حد خلية جوجل شيت ===== */
+function fileToCompressed(file, maxChars = 45000) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = Math.min(img.width, 700), q = 0.7, out = "";
+        for (let i = 0; i < 8; i++) {
+          const h = Math.round(img.height * w / img.width);
+          const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+          cv.getContext("2d").drawImage(img, 0, 0, w, h);
+          out = cv.toDataURL("image/jpeg", q);
+          if (out.length <= maxChars) break;
+          w = Math.round(w * 0.8); q = Math.max(q - 0.1, 0.3);
+        }
+        resolve(out.length <= maxChars ? out : "");
+      };
+      img.onerror = reject; img.src = fr.result;
+    };
+    fr.onerror = reject; fr.readAsDataURL(file);
+  });
+}
+
+/* ============ نموذج الحجز ============ */
+function renderBookingForm(c, isAdmin) {
+  selectedCar = null;
+  c.innerHTML = `
+    <div class="card"><div class="card-title">📋 بيانات العميل</div>
+      <div class="grid-2 keep2">
+        <div class="form-field"><label>الاسم الثلاثي</label><input type="text" id="fullName" placeholder="مثال: أحمد محمد علي"></div>
+        <div class="form-field"><label>القبيلة</label><input type="text" id="tribe" placeholder="مثال: الحارثي"></div>
+        <div class="form-field"><label>رقم الهاتف</label><input type="tel" id="phone" placeholder="مثال: 91234567"></div>
+        <div class="form-field"><label>رقم هاتف 2</label><input type="tel" id="phone2" placeholder="مثال: 92345678"></div>
+        <div class="form-field"><label>البريد الإلكتروني</label><input type="email" id="email" placeholder="example@mail.com"></div>
+        <div class="form-field"><label>الرقم المدني</label><input type="text" id="civilId" placeholder="مثال: 1234567890"></div>
+        <div class="form-field"><label>تاريخ الاستلام والوقت</label><input type="datetime-local" id="pickupDate" onchange="calcTotal()"></div>
+        <div class="form-field"><label>تاريخ الإرجاع والوقت</label><input type="datetime-local" id="returnDate" onchange="calcTotal()"></div>
+        <div class="form-field" style="grid-column:1/-1"><label>صورة البطاقة الشخصية</label><input type="file" id="idCardImage" accept="image/*"></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">🚙 بيانات السيارة</div>
+      <button type="button" class="main-btn" id="chooseCarBtn" onclick="toggleCarList()">🚙 اختيار السيارة</button>
+      <div id="selectedCarInfo" style="margin-top:12px;color:#94a3b8;font-size:14px">لم يتم اختيار سيارة بعد</div>
+      <div class="car-list" id="carListBox" style="display:none;margin-top:15px">${cars.map(x => carCard(x, "", `data-id="${x.id}" onclick="selectCar(${x.id})"`)).join("")}</div>
+    </div>
+    <div class="card"><div class="card-title">💵 ملخص الحجز</div>
+      <div class="grid-3 keep2">
+        <div class="form-field"><label>عدد الساعات</label><input type="text" id="hoursDisplay" readonly value="0"></div>
+        <div class="form-field"><label>سعر الساعة</label><input type="text" id="priceDisplay" readonly value="0"></div>
+        <div class="form-field"><label>المبلغ الإجمالي</label><input type="text" id="totalDisplay" readonly value="0" style="font-weight:bold;color:#059669"></div>
+        ${isAdmin ? `
+        <div class="form-field"><label>المدفوع</label><input type="number" id="paidAmount" min="0" step="any" value="0" oninput="calcRemaining()"></div>
+        <div class="form-field"><label>الباقي</label><input type="text" id="remainingDisplay" readonly value="0 ريال" style="font-weight:bold;color:#dc2626"></div>
+        <div class="form-field"><label>حالة الاستلام</label>
+          <select id="receiveStatus" onchange="onReceiveChange()">
+            <option value="waiting">⏳ انتظار الاستلام</option><option value="received">🚗 تم الاستلام</option><option value="returned">✅ تم الإرجاع</option>
+          </select></div>
+        <div class="form-field"><label>تاريخ ووقت التحديث</label><input type="text" id="receiveUpdatedDisplay" readonly value="-"></div>
+        <div class="form-field"><label>حالة الطلب</label>
+          <select id="adminOrderStatus"><option value="pending">⏳ قيد الانتظار</option><option value="approved" selected>✅ تم الموافقة</option><option value="rejected">❌ مرفوض</option></select></div>
+          ` : `
+        <div class="form-field"><label>حالة الاستلام</label><input type="text" id="receiveStatusUser" value="⏳ انتظار الاستلام" readonly disabled style="font-weight:bold;color:#92400e;background:#fef3c7"></div>
+        `}
+      </div>
+      <div class="actions"><button class="btn-save" onclick="saveBooking(${isAdmin})">💾 حفظ الحجز</button></div>
+    </div>`;
+    if (!isAdmin) fillProfile();
+}
+function toggleCarList() {
+  const box = $("carListBox"), open = box.style.display === "none";
+  box.style.display = open ? "grid" : "none";
+  $("chooseCarBtn").textContent = open ? "✖ إخفاء السيارات" : (selectedCar ? "🔄 تغيير السيارة" : "🚙 اختيار السيارة");
+}
+function selectCar(id) {
+  selectedCar = cars.find(c => c.id === id);
+  document.querySelectorAll("[data-id]").forEach(el => el.classList.toggle("selected", +el.dataset.id === id));
+  const c = selectedCar;
+  $("selectedCarInfo").innerHTML = `<div style="display:flex;gap:12px;align-items:center;background:#ecfdf5;border:2px solid #10b981;border-radius:12px;padding:10px">
+    <img src="${c.img}" onerror="this.src=NOIMG" style="width:90px;height:60px;object-fit:cover;border-radius:8px">
+    <div style="color:#334155;font-size:13px;line-height:1.7"><b style="color:#1e3a8a;font-size:15px">${esc(c.name)}</b><br>🏢 ${esc(c.agency)} · 🚘 ${esc(c.type)}<br>🔢 ${esc(c.plate)} · 🔑 ${esc(c.keyNumber || "-")} · 💰 ${c.price} ريال/ساعة</div></div>`;
+  $("carListBox").style.display = "none";
+  $("chooseCarBtn").textContent = "🔄 تغيير السيارة";
+  calcTotal();
+}
+function calcTotal() {
+  const hoursEl = $("hoursDisplay"); if (!hoursEl || !selectedCar) return;
+  const hours = hoursBetween($("pickupDate").value, $("returnDate").value);
+  hoursEl.value = fmtHours(hours);
+  $("priceDisplay").value = selectedCar.price + " ريال";
+  $("totalDisplay").value = hours * selectedCar.price + " ريال";
+  calcRemaining();
+}
+function calcRemaining() {
+  if (!$("paidAmount")) return;
+  const total = parseFloat($("totalDisplay").value) || 0, paid = parseFloat($("paidAmount").value) || 0;
+  $("remainingDisplay").value = Math.max(total - paid, 0) + " ريال";
+}
+function onReceiveChange() { $("receiveUpdatedDisplay").value = nowStamp(); }
+
+const showLoading = (t = "جارٍ الحفظ ...") => { $("loadingText").textContent = t; $("loadingOverlay").classList.add("show"); };
+const hideLoading = () => $("loadingOverlay").classList.remove("show");
+
+
+function saveBooking(isAdmin) {
+  const v = i => $(i).value.trim();
+  const fullName = v("fullName"), phone = v("phone"), civilId = v("civilId"), pickupDate = v("pickupDate"), returnDate = v("returnDate");
+  if (!fullName || !phone || !civilId || !pickupDate || !returnDate) { alert("⚠️ الرجاء تعبئة جميع الحقول المطلوبة"); return; }
+  if (!selectedCar) { alert("⚠️ الرجاء اختيار سيارة"); return; }
+  const hours = hoursBetween(pickupDate, returnDate);
+  if (!hours) { alert("⚠️ تاريخ الإرجاع يجب أن يكون بعد تاريخ الاستلام"); return; }
+  const totalAmount = hours * selectedCar.price;
+  const paidAmount = isAdmin ? (parseFloat($("paidAmount").value) || 0) : 0;
+  if (paidAmount < 0 || paidAmount > totalAmount) { alert("⚠️ المبلغ المدفوع غير صحيح (أكبر من الإجمالي)"); return; }
+  const file = $("idCardImage").files[0];
+  const profile = isAdmin ? null : { name: fullName, tribe: v("tribe"), phone2: v("phone2"), email: v("email"), idCard: civilId };
+
+  const finalize = async img => {
+    const id = bookings.length ? Math.max(...bookings.map(b => b.id)) + 1 : 1;
+    const savedPhoto = currentUser?.profile?.photo || "";
+    try {
+      bookings.push({
+        id, ownerPhone: currentUser?.phone || "",
+        fullName, tribe: v("tribe"), phone, phone2: v("phone2"), email: v("email"), civilId,
+        pickupDate, returnDate, hours, totalAmount, paidAmount,
+        paid: totalAmount > 0 && paidAmount >= totalAmount,
+        car: { ...selectedCar },
+        idCardImage: img || (isAdmin ? "" : savedPhoto),
+        status: isAdmin ? $("adminOrderStatus").value : "pending",
+        receiveStatus: isAdmin ? $("receiveStatus").value : "waiting",
+        receiveUpdatedAt: nowStamp(),            // تاريخ ووقت لحظة الحفظ
+        createdAt: new Date().toISOString()
+      });
+      saveData();
+
+      // حفظ بيانات المستخدم في Google Sheet
+      if (!isAdmin) {
+        try {
+          let photo = savedPhoto;
+          if (file) photo = (await fileToCompressed(file)) || savedPhoto;
+          const res = await api({ action: "updateProfile", phone: currentUser.phone, password: currentUser.password, ...profile, photo });
+          if (res.ok) currentUser.profile = { ...currentUser.profile, ...profile, photo };
+          else if (res.expired) showExpired();
+          else alert("⚠️ تم حفظ الحجز، لكن تعذر تحديث بياناتك في الشيت: " + (res.error || ""));
+        } catch (e) {
+          alert("⚠️ تم حفظ الحجز، لكن تعذر الاتصال بالشيت لتحديث بياناتك");
+        }
+      }
+    } finally {
+      hideLoading();
+    }
+    showSuccessMessage(id, isAdmin);
+  };
+
+  showLoading();
+  if (file) {
+    const r = new FileReader();
+    r.onload = e => finalize(e.target.result);
+    r.onerror = hideLoading;
+    r.readAsDataURL(file);
+  } else finalize("");
+}
+
+
+function showSuccessMessage(orderId, isAdmin) {
+  const o = document.createElement("div");
+  o.className = "ok-overlay";
+  o.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:2000";
+  o.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:35px 40px;text-align:center;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="width:80px;height:80px;margin:0 auto 15px;background:linear-gradient(135deg,#059669,#10b981);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:45px;color:#fff">✓</div>
+      <h2 style="color:#065f46;font-size:22px;margin-bottom:10px">تم حفظ الحجز بنجاح</h2>
+      <p style="color:#64748b;font-size:14px;margin-bottom:20px">${isAdmin ? "تم إضافة الحجز إلى قائمة الطلبات" : "سيتم مراجعة طلبك من قبل الإدارة"}</p>
+      <div style="background:#ecfdf5;border:2px dashed #10b981;border-radius:12px;padding:15px;margin-bottom:20px">
+        <div style="font-size:13px;color:#065f46;margin-bottom:5px">رقم الطلب</div>
+        <div style="font-size:28px;font-weight:bold;color:#059669;letter-spacing:2px">#${String(orderId).padStart(4, "0")}</div>
+      </div>
+      <button onclick="this.closest('.ok-overlay').remove();showPage('${isAdmin ? "orders" : "booking"}')" style="width:100%;padding:13px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer">موافق</button>
+    </div>`;
+  document.body.appendChild(o);
+}
+
+/* ============ تعديل الطلب ============ */
+function openEditOrder(id) {
+  const b = bookings.find(x => x.id === id); if (!b) return;
+  $("editOrderId").value = b.id;
+  $("editFullName").value = b.fullName || "";
+  $("editTribe").value = b.tribe || "";
+  $("editPhone").value = b.phone || "";
+  $("editPhone2").value = b.phone2 || "";
+  $("editEmail").value = b.email || "";
+  $("editCivilId").value = b.civilId || "";
+  $("editPickupDate").value = b.pickupDate || "";
+  $("editReturnDate").value = b.returnDate || "";
+  $("editPaidAmount").value = paidOf(b);
+  $("editStatus").value = b.status || "pending";
+  $("editReceiveStatus").value = b.receiveStatus || "waiting";
+  $("editReceiveUpdated").value = b.receiveUpdatedAt || "-";
+    $("editCarSelect").innerHTML = `<option value="">— إبقاء السيارة الحالية —</option>` +
+    cars.map(c => `<option value="${c.id}">${esc(c.name)} — ${esc(c.plate)}</option>`).join("");
+  $("editCarAgency").value = b.car?.agency || "";
+  $("editCarName").value = b.car?.name || "";
+  $("editCarType").value = b.car?.type || "";
+  $("editCarPlate").value = b.car?.plate || "";
+  $("editCarKey").value = b.car?.keyNumber || "";
+  $("editCarPrice").value = b.car?.price || 0;
+  updateEditCalc();
+  $("editOrderModal").classList.add("show");
+}
+
+function fillEditCar(carId) {
+  const c = cars.find(x => String(x.id) === String(carId));
+  if (!c) return;
+  $("editCarAgency").value = c.agency || "";
+  $("editCarName").value = c.name || "";
+  $("editCarType").value = c.type || "";
+  $("editCarPlate").value = c.plate || "";
+  $("editCarKey").value = c.keyNumber || "";
+  $("editCarPrice").value = c.price || 0;
+  updateEditCalc();
+}
+
+function updateEditCalc() {
+  const hours = hoursBetween($("editPickupDate").value, $("editReturnDate").value);
+  const price = parseFloat($("editCarPrice").value) || 0;
+  const total = hours * price, paid = parseFloat($("editPaidAmount").value) || 0;
+  $("editHoursDisplay").value = fmtHours(hours);
+  $("editTotalDisplay").value = total + " ريال";
+  $("editRemainingDisplay").value = Math.max(total - paid, 0) + " ريال";
+}
+
+function updateOrder() {
+  const b = bookings.find(x => String(x.id) === $("editOrderId").value); if (!b) return;
+  const pickupDate = $("editPickupDate").value, returnDate = $("editReturnDate").value;
+  if (!pickupDate || !returnDate) { alert("⚠️ الرجاء إدخال التواريخ"); return; }
+  const hours = hoursBetween(pickupDate, returnDate);
+  if (!hours) { alert("⚠️ تاريخ الإرجاع يجب أن يكون بعد تاريخ الاستلام"); return; }
+
+  const carPrice = parseFloat($("editCarPrice").value) || 0;
+  const totalAmount = hours * carPrice;
+  const paidAmount = parseFloat($("editPaidAmount").value) || 0;
+  if (paidAmount < 0 || paidAmount > totalAmount) { alert("⚠️ المبلغ المدفوع غير صحيح (أكبر من الإجمالي)"); return; }
+
+  // السيارة: نسخة الطلب الحالية + التعديلات، وإذا اختير سيارة جديدة تتغير الصورة والمعرّف
+  const pickedCar = cars.find(x => String(x.id) === $("editCarSelect").value);
+  const car = {
+    ...(b.car || {}),
+    agency: $("editCarAgency").value.trim(),
+    name: $("editCarName").value.trim(),
+    type: $("editCarType").value.trim(),
+    plate: $("editCarPlate").value.trim(),
+    keyNumber: $("editCarKey").value.trim(),
+    price: carPrice
+  };
+  if (pickedCar) { car.id = pickedCar.id; car.img = pickedCar.img; }
+
+  Object.assign(b, {
+    fullName: $("editFullName").value.trim(), tribe: $("editTribe").value.trim(),
+    phone: $("editPhone").value.trim(), phone2: $("editPhone2").value.trim(),
+    email: $("editEmail").value.trim(), civilId: $("editCivilId").value.trim(),
+    pickupDate, returnDate, hours, totalAmount, paidAmount,
+    paid: totalAmount > 0 && paidAmount >= totalAmount,
+    status: $("editStatus").value,
+    car
+  });
+  const newReceive = $("editReceiveStatus").value;
+  if (newReceive !== (b.receiveStatus || "waiting")) { b.receiveStatus = newReceive; b.receiveUpdatedAt = nowStamp(); }
+
+  saveData(); closeModal("editOrderModal"); showPage("orders");
+  alert("✅ تم تعديل الطلب بنجاح");
+}
+
+/* ============ أحداث عامة ============ */
+document.querySelectorAll(".modal-overlay").forEach(el =>
+  el.addEventListener("click", e => { if (e.target === el) el.classList.remove("show"); }));
+$("loginPassword").addEventListener("keypress", e => { if (e.key === "Enter") doLogin(); });
+fillSavedCredentials(); 
+
+
+/* ============================================================
+   تثبيت التطبيق (PWA)
+   ============================================================ */
+let deferredInstallPrompt = null;
+
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function showInstallBar() {
+  if (isStandalone()) return;
+  document.getElementById('installBar').classList.add('show');
+  document.body.classList.add('has-install-bar');
+}
+
+function hideInstallBar() {
+  document.getElementById('installBar').classList.remove('show');
+  document.body.classList.remove('has-install-bar');
+}
+
+// أندرويد / كروم / إيدج
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBar();
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    hideInstallBar(false);
+  } else if (isIOS()) {
+    alert('لتثبيت التطبيق على الآيفون:\nاضغط زر المشاركة ⬆️ في سفاري\nثم اختر "إضافة إلى الشاشة الرئيسية"');
+  }
+});
+
+window.addEventListener('appinstalled', () => hideInstallBar(false));
+
+// آيفون: لا يوجد beforeinstallprompt، فنعرض الشريط يدوياً
+if (isIOS() && !isStandalone()) {
+  document.getElementById('installText').textContent = '📲 للتثبيت: مشاركة ⬆️ ← إضافة إلى الشاشة الرئيسية';
+  document.getElementById('installBtn').textContent = 'كيف؟';
+  setTimeout(showInstallBar, 2500);
+}
+
+// تسجيل الـ Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW error:', err));
+  });
+}
+
+</script>
+</body>
+</html>
