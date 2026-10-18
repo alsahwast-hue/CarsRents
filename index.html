@@ -889,8 +889,7 @@ let usersState = { q: "", page: 1, total: 0, list: [] };
 const adminApi = p => api({ ...p, adminPhone: currentUser.phone, adminPassword: currentUser.password });
 
 let usersSearchTimer = null;
-let usersSearchSeq = 0;
-
+  
 function renderUsersPage(c) {
   usersState = { q: "", page: 1, total: 0, list: [] };
   c.innerHTML = `
@@ -920,12 +919,15 @@ function searchUsers() {
 
 function usersGoto(p) { usersState.page = p; loadUsers(); }
 
+let usersSearchSeq = 0;   // عرّفه مرة واحدة فقط خارج الدالة (إن كان معرّفاً سابقاً فلا تكرره)
+
 async function loadUsers() {
   const box = $("usersTableBox");
+  const seq = ++usersSearchSeq;
   box.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><p>جارٍ التحميل...</p></div>`;
   try {
     const res = await adminApi({ action: "listUsers", q: usersState.q, page: usersState.page });
-    if (seq !== usersSearchSeq) return; 
+    if (seq !== usersSearchSeq) return;   // ردّ قديم، تجاهله
     if (!res.ok) { box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(res.error)}</p></div>`; return; }
     usersState.list = res.users; usersState.total = res.total;
     $("usersCount").textContent = res.total;
@@ -954,7 +956,8 @@ async function loadUsers() {
         <span style="font-size:13px;color:#64748b">صفحة ${usersState.page} من ${pages}</span>
         <button class="btn-sm btn-view" style="padding:8px 14px" ${usersState.page >= pages ? "disabled" : ""} onclick="usersGoto(${usersState.page + 1})">التالي</button>
       </div>` : ""}`;
-    } catch (e) {
+    labelTables();
+  } catch (e) {
     if (seq !== usersSearchSeq) return;
     box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>تعذر الاتصال بالخادم</p></div>`;
   }
