@@ -792,14 +792,23 @@ function renderUsersPage(c) {
     <div class="section-header">
       <h2>👥 إدارة المستخدمين <span class="badge-count" id="usersCount">0</span></h2>
       <div style="display:flex;gap:8px;flex:1;max-width:440px">
-        <input type="search" id="usersSearch" placeholder="بحث بالاسم أو الهاتف أو البريد أو الرقم المدني"
-          style="flex:1;min-width:0;padding:11px 13px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px"
-          onkeydown="if(event.key==='Enter')searchUsers()">
+     <input type="search" id="usersSearch" placeholder="بحث بالاسم أو الهاتف أو البريد أو الرقم المدني"
+  style="flex:1;min-width:0;padding:11px 13px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px"
+  oninput="onUsersSearchInput()"
+  onkeydown="if(event.key==='Enter'){clearTimeout(usersSearchTimer);searchUsers()}">
         <button class="btn-sm btn-view" style="padding:0 16px;font-size:15px" onclick="searchUsers()">🔍</button>
       </div>
     </div>
     <div class="card"><div class="card-title">📋 قائمة المستخدمين</div><div id="usersTableBox"></div></div>`;
   loadUsers();
+}
+
+let usersSearchTimer = null;
+let usersSearchSeq = 0; // لتجاهل الردود القديمة
+
+function onUsersSearchInput() {
+  clearTimeout(usersSearchTimer);
+  usersSearchTimer = setTimeout(searchUsers, 400); // ينتظر 0.4 ثانية بعد آخر حرف
 }
 
 function searchUsers() {
@@ -815,6 +824,7 @@ async function loadUsers() {
   box.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><p>جارٍ التحميل...</p></div>`;
   try {
     const res = await adminApi({ action: "listUsers", q: usersState.q, page: usersState.page });
+    if (seq !== usersSearchSeq) return;
     if (!res.ok) { box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${esc(res.error)}</p></div>`; return; }
     usersState.list = res.users; usersState.total = res.total;
     $("usersCount").textContent = res.total;
@@ -844,6 +854,7 @@ async function loadUsers() {
         <button class="btn-sm btn-view" style="padding:8px 14px" ${usersState.page >= pages ? "disabled" : ""} onclick="usersGoto(${usersState.page + 1})">التالي</button>
       </div>` : ""}`;
   } catch (e) {
+    if (seq !== usersSearchSeq) return;
     box.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>تعذر الاتصال بالخادم</p></div>`;
   }
 }
